@@ -162,7 +162,48 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    goalState = None
+    startState = problem.getStartState()
+    parentStateDict = { startState: None }
+    parentDirectionDict = { startState: None }
+    stateCostDict = { startState: 0 }
+    priorityQueue = util.PriorityQueue()
+    priorityQueue.push(startState, stateCostDict[startState])
+    removedStates = set()
+    while not priorityQueue.isEmpty():
+        state = priorityQueue.pop()
+        if not state in removedStates:
+            removedStates.add(state)
+            if problem.isGoalState(state):
+                goalState = state
+                break
+
+            successors = problem.getSuccessors(state)
+            for successor in successors:
+                successorState = successor[0]
+                successorDirection = successor[1]
+                successorCost = successor[2]
+                if (not successorState in removedStates) and \
+                (not successor in stateCostDict or successorCost + \
+                stateCostDict[state] < stateCostDict[successor]):
+                    parentStateDict[successorState] = state
+                    parentDirectionDict[successorState] = successorDirection
+                    stateCostDict[successorState] = successorCost + \
+                    stateCostDict[state]
+                    priorityQueue.push(successorState, \
+                    stateCostDict[successorState])
+
+    if goalState:
+        actionList = []
+        state = goalState
+        while cmp(state, startState) != 0:
+            actionList.append(parentDirectionDict[state])
+            state = parentStateDict[state]
+
+        actionList.reverse()
+        return actionList
+    else:
+        return None
 
 def nullHeuristic(state, problem=None):
     """
