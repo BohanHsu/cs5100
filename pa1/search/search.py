@@ -184,8 +184,8 @@ def uniformCostSearch(problem):
                 successorDirection = successor[1]
                 successorCost = successor[2]
                 if (not successorState in removedStates) and \
-                (not successor in stateCostDict or successorCost + \
-                stateCostDict[state] < stateCostDict[successor]):
+                (not successorState in stateCostDict or successorCost + \
+                stateCostDict[state] < stateCostDict[successorState]):
                     parentStateDict[successorState] = state
                     parentDirectionDict[successorState] = successorDirection
                     stateCostDict[successorState] = successorCost + \
