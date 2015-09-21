@@ -379,9 +379,8 @@ def cornersHeuristic(state, problem):
     if len(unvisitedCorners) == 0:
         return 0
 
-    nearestUnvisitedCorner = min(unvisitedCorners, key=lambda corner: \
-    ((corner[0] - state[0]) ** 2 + (corner[1] - state[1]) ** 2))
-    return util.manhattanDistance(state, nearestUnvisitedCorner)
+    return sum([util.manhattanDistance(state, unvisitedCorner) for \
+    unvisitedCorner in unvisitedCorners])
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
