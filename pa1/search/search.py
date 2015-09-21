@@ -215,8 +215,49 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    goalState = None
+    startState = problem.getStartState()
+    parentStateDict = { startState: None }
+    parentDirectionDict = { startState: None }
+    stateCostDict = { startState: 0 }
+    removedStates = set()
+    priorityQueue = util.PriorityQueue()
+    priorityQueue.push(startState, heuristic(startState, problem) + \
+    stateCostDict[startState])
+    while not priorityQueue.isEmpty():
+        state = priorityQueue.pop()
+        if not state in removedStates:
+            removedStates.add(state)
+            if problem.isGoalState(state):
+                goalState = state
+                break
 
+            successors = problem.getSuccessors(state)
+            for successor in successors:
+                successorState = successor[0]
+                successorDirection = successor[1]
+                successorCost = successor[2]
+                fs = heuristic(successorState, problem) + successorCost
+                if (not successorState in removedStates) and \
+                (not successorState in stateCostDict or \
+                fs + stateCostDict[state] < stateCostDict[successorState]):
+                    parentStateDict[successorState] = state
+                    parentDirectionDict[successorState] = successorDirection
+                    stateCostDict[successorState] = fs + stateCostDict[state]
+                    priorityQueue.push(successorState, \
+                    stateCostDict[successorState])
+
+    if goalState:
+        actionList = []
+        state = goalState
+        while cmp(state, startState) != 0:
+            actionList.append(parentDirectionDict[state])
+            state = parentStateDict[state]
+
+        actionList.reverse()
+        return actionList
+    else:
+        return None
 
 # Abbreviations
 bfs = breadthFirstSearch
