@@ -474,7 +474,9 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    foodList = foodGrid.asList()
+    return sum([util.manhattanDistance(foodPosition, position) for \
+    foodPosition in foodList])
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
