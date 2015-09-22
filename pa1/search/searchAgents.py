@@ -379,7 +379,7 @@ def cornersHeuristic(state, problem):
     if len(unvisitedCorners) == 0:
         return 0
 
-    return sum([util.manhattanDistance(state, unvisitedCorner) for \
+    return max([util.manhattanDistance(state, unvisitedCorner) for \
     unvisitedCorner in unvisitedCorners])
 
 class AStarCornersAgent(SearchAgent):
@@ -475,7 +475,10 @@ def foodHeuristic(state, problem):
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
     foodList = foodGrid.asList()
-    return sum([util.manhattanDistance(foodPosition, position) for \
+    if len(foodList) == 0:
+        return 0
+
+    return max([util.manhattanDistance(foodPosition, position) for \
     foodPosition in foodList])
 
 class ClosestDotSearchAgent(SearchAgent):
