@@ -474,12 +474,39 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
+
+    def pacmanDistance(source, targets, problem):
+        mazeWalls = problem.startingGameState.getWalls()
+        removedStates = set()
+        targetsDict = {target: -1 for target in targets}
+        queue = util.Queue()
+        queue.push((source, 0))
+
+        while not queue.isEmpty():
+            state, oldDistance = queue.pop()
+            if not state in removedStates:
+                removedStates.add(state)
+
+                if state in targetsDict and targetsDict[state] == -1:
+                    targetsDict[state] = oldDistance
+
+                if len([v for k, v in targetsDict.iteritems() if v == -1]) == 0:
+                    return [targetsDict[target] for target in targets]
+
+                def positionAdd(p1, p2):
+                    return (int(p1[0] + p2[0]), int(p1[1] + p2[1]))
+
+                [queue.push(((nextx, nexty), oldDistance + 1)) for \
+                nextx, nexty in [positionAdd(Actions.directionToVector(action),\
+                state) for action in [Directions.NORTH, Directions.SOUTH, \
+                Directions.EAST, Directions.WEST]] if not mazeWalls\
+                [nextx][nexty]]
+
     foodList = foodGrid.asList()
     if len(foodList) == 0:
         return 0
 
-    return max([util.manhattanDistance(foodPosition, position) for \
-    foodPosition in foodList])
+    return max(pacmanDistance(position, foodList, problem))
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
