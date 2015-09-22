@@ -73,6 +73,7 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -88,39 +89,20 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    goalState = None
-    startState = problem.getStartState()
-    parentStateDict = { startState: None }
-    parentDirectionDict = { startState: None }
+    removedStates = set()
+    startState = (problem.getStartState(), [])
     stack = util.Stack()
     stack.push(startState)
     while not stack.isEmpty():
-        state = stack.pop()
-        if problem.isGoalState(state):
-            goalState = state
-            break
+        state, path = stack.pop()
+        if not state in removedStates:
+            removedStates.add(state)
+            if problem.isGoalState(state):
+                return path
 
-        successors = problem.getSuccessors(state)
-        for successor in successors:
-            successorState = successor[0]
-            successorDirection = successor[1]
-            successorCost = successor[2]
-            if not successorState in parentStateDict:
-                parentStateDict[successorState] = state
-                parentDirectionDict[successorState] = successorDirection
-                stack.push(successorState)
-
-    if goalState:
-        actionList = []
-        state = goalState
-        while cmp(state, startState) != 0:
-            actionList.append(parentDirectionDict[state])
-            state = parentStateDict[state]
-
-        actionList.reverse()
-        return actionList
-    else:
-        return None
+            for successorState, successorDirection, successorCost in \
+            problem.getSuccessors(state):
+                stack.push((successorState, path + [successorDirection]))
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
