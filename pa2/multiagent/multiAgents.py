@@ -75,7 +75,60 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        #print "???===================================="
+        #print "???newPos", newPos
+        #print "???newfood", newFood
+        #print "???newGhostStates[0].getPosition()", newGhostStates[0].getPosition()
+        #print "???newScaredTimes", newScaredTimes
+        #print "???successorGameState.getScore()", successorGameState.getScore()
+        #print successorGameState.getWalls()[1][2]
+
+        mazeWalls = currentGameState.getWalls()
+        foodList = newFood.asList()
+        #capsulePositions = currentGameState.getCapsultes()
+        capsulePositions = currentGameState.getCapsules()
+        distanceToAllFoods = pacmanDistanceToTargets(newPos, foodList, mazeWalls)
+
+        eatBean = currentGameState.getNumFood() - \
+        successorGameState.getNumFood() == 1
+
+        score = 0.0
+
+        if action == Directions.STOP:
+            score -= 1
+
+        if eatBean:
+            score += 100
+
+        if (len(distanceToAllFoods) != 0):
+            score -= min(distanceToAllFoods)
+
+        return score
+
+def pacmanDistanceToTargets(source, targets, walls):
+    removedStates = set()
+    targetsDict = {target: -1 for target in targets}
+    queue = util.Queue()
+    queue.push((source, 0))
+    actions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    while not queue.isEmpty():
+        state, distance = queue.pop()
+        if not state in removedStates:
+            removedStates.add(state)
+
+            if state in targetsDict and targetsDict[state] == -1:
+                targetsDict[state] = distance
+
+            if (len([k for k, v in targetsDict.iteritems() if v == -1]) == 0):
+                return [targetsDict[target] for target in targets]
+
+            def positionAdd(p1, p2):
+                return (int(p1[0] + p2[0]), int(p1[1] + p2[1]))
+
+            [queue.push(((nextx, nexty), distance + 1)) for nextx, nexty in \
+            [positionAdd(state, action) for action in actions] if not \
+            walls[nextx][nexty]]
 
 def scoreEvaluationFunction(currentGameState):
     """
