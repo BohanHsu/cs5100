@@ -103,6 +103,24 @@ class ReflexAgent(Agent):
         if (len(distanceToAllFoods) != 0):
             score -= min(distanceToAllFoods)
 
+        def positionToInt(position):
+            return (int(position[0]), int(position[1]))
+
+        print "??? ========="
+        print newGhostStates
+        print map(lambda ghostState: positionToInt(ghostState.getPosition()), newGhostStates)
+
+        distanceToAllGhost = pacmanDistanceToTargets(newPos, map(lambda \
+        ghostState: positionToInt(ghostState.getPosition()), newGhostStates), \
+        mazeWalls)
+
+        print distanceToAllGhost
+
+        if (len(distanceToAllGhost) != 0):
+            distanceToClostestGhost = min(distanceToAllGhost)
+            if (distanceToClostestGhost < 5):
+                score -= (5 - distanceToClostestGhost) * 100
+
         return score
 
 def pacmanDistanceToTargets(source, targets, walls):
