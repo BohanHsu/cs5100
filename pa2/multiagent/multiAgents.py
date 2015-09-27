@@ -75,51 +75,72 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        #print "???===================================="
-        #print "???newPos", newPos
-        #print "???newfood", newFood
-        #print "???newGhostStates[0].getPosition()", newGhostStates[0].getPosition()
-        #print "???newScaredTimes", newScaredTimes
-        #print "???successorGameState.getScore()", successorGameState.getScore()
-        #print successorGameState.getWalls()[1][2]
-
+        currentGhostStates = currentGameState.getGhostStates()
         mazeWalls = currentGameState.getWalls()
         foodList = newFood.asList()
-        #capsulePositions = currentGameState.getCapsultes()
         capsulePositions = currentGameState.getCapsules()
         distanceToAllFoods = pacmanDistanceToTargets(newPos, foodList, mazeWalls)
 
-        eatBean = currentGameState.getNumFood() - \
-        successorGameState.getNumFood() == 1
-
         score = 0.0
 
+        # don't want pacman keep stop
         if action == Directions.STOP:
             score -= 1
 
+        # give credit for pacman if eat a bean
+        eatBean = currentGameState.getNumFood() - \
+        successorGameState.getNumFood() == 1
         if eatBean:
             score += 100
 
+        # guide pacman to clostest food
         if (len(distanceToAllFoods) != 0):
             score -= min(distanceToAllFoods)
 
+        # make pacman fear ghost
         def positionToInt(position):
             return (int(position[0]), int(position[1]))
 
-        print "??? ========="
-        print newGhostStates
-        print map(lambda ghostState: positionToInt(ghostState.getPosition()), newGhostStates)
-
         distanceToAllGhost = pacmanDistanceToTargets(newPos, map(lambda \
-        ghostState: positionToInt(ghostState.getPosition()), newGhostStates), \
-        mazeWalls)
-
-        print distanceToAllGhost
+        ghostState: positionToInt(ghostState.getPosition()), \
+        [newGhostStates[i] for i in range(len(newGhostStates)) if \
+        newScaredTimes[i] == 0]), mazeWalls)
 
         if (len(distanceToAllGhost) != 0):
             distanceToClostestGhost = min(distanceToAllGhost)
             if (distanceToClostestGhost < 5):
                 score -= (5 - distanceToClostestGhost) * 100
+
+                # if pacman felt chased by ghost, try to find the capsule
+                if (len(capsulePositions) != 0):
+                    distanceToAllCapsules = pacmanDistanceToTargets(newPos, \
+                    capsulePositions, mazeWalls)
+                    distanceToClostestCapsule = min(distanceToAllCapsules)
+                    score -= distanceToClostestCapsule * 80
+
+        # try to capture eatable ghost to get 1000 points
+        if (len([0 for ghostState in currentGhostStates if \
+        ghostState.scaredTimer]) != 0):
+            eatableGhosts = {newGhostStates[i].getPosition() : newScaredTimes[i] \
+            for i in range(len(newGhostStates)) if newScaredTimes[i] != 0}
+            eatableGhostPositions = [eatableGhostPos for eatableGhostPos, \
+            scaredTime in eatableGhosts.iteritems()]
+            eatableGhostScareTimes = [scaredTime for eatableGhostPos,
+            scaredTime in eatableGhosts.iteritems()]
+
+            distanceToAllEatableGhosts = pacmanDistanceToTargets(newPos,\
+            map(lambda ghostPos: positionToInt(ghostPos), \
+            eatableGhostPositions), mazeWalls)
+
+            eatableGhosts = [(eatableGhostPositions[i], \
+            eatableGhostScareTimes[i], distanceToAllEatableGhosts[i])for i in \
+            range(len(eatableGhostPositions)) if \
+            distanceToAllEatableGhosts[i] < eatableGhostScareTimes[i]]
+
+            if (len(eatableGhosts) != 0):
+                clostestEatableGhost = min(eatableGhosts, \
+                key=lambda tuple: tuple[1])
+                score -= (clostestEatableGhost[2]) * 5
 
         return score
 
