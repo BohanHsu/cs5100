@@ -225,7 +225,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         def terminalTest(gameState, depth):
             return gameState.isWin() or gameState.isLose() or depth >= self.depth
 
-        def minmaxDecision(gameState):
+        def minimaxDecision(gameState):
             v = -float('inf')
             selectedAction = None
             actions = gameState.getLegalActions(0)
@@ -264,7 +264,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
             return v
 
-        return minmaxDecision(gameState)
+        return minimaxDecision(gameState)
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -351,7 +351,53 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def terminalTest(gameState, depth):
+            return gameState.isWin() or gameState.isLose() or depth >= self.depth
+
+        def expectimaxDecision(gameState):
+            v = -float('inf')
+            selectedAction = None
+            actions = gameState.getLegalActions(0)
+            for action in actions:
+                prev = v
+                v = max(expectValue(gameState.generateSuccessor(0, action), 0, 1), v)
+                if v > prev:
+                    selectedAction = action
+
+            return selectedAction
+
+        def maxValue(gameState, depth):
+            agentIndex = 0
+            if terminalTest(gameState, depth):
+                return self.evaluationFunction(gameState)
+
+            v = -float('inf')
+            actions = gameState.getLegalActions(agentIndex)
+            for action in actions:
+                v = max(expectValue(gameState.generateSuccessor(0, action), depth, 1), v)
+
+            return v
+
+        def expectValue(gameState, depth, agentIndex):
+            if terminalTest(gameState, depth):
+                return self.evaluationFunction(gameState)
+
+            weight = 0.0
+            count = 0
+            actions = gameState.getLegalActions(agentIndex)
+            if agentIndex == gameState.getNumAgents() - 1:
+                for action in actions:
+                    #v = min(maxValue(gameState.generateSuccessor(agentIndex, action), depth + 1), v)
+                    weight += maxValue(gameState.generateSuccessor(agentIndex, action), depth + 1)
+                    count += 1
+            else:
+                for action in actions:
+                    weight += expectValue(gameState.generateSuccessor(agentIndex, action), depth, agentIndex + 1)
+                    count += 1
+
+            return weight / count
+
+        return expectimaxDecision(gameState)
 
 def betterEvaluationFunction(currentGameState):
     """
