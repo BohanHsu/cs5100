@@ -407,7 +407,93 @@ def betterEvaluationFunction(currentGameState):
       DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    score = 0.0
+    foodList = currentGameState.getFood().asList()
+    numOfFoodLeft = len(foodList)
+    mazeWalls = currentGameState.getWalls()
+    ghostStates = currentGameState.getGhostStates()
+    numOfGhosts = len(ghostStates)
+    ghostPositions = [ghostState.getPosition() for ghostState in ghostStates if ghostState.scaredTimer == 0]
+    eatableGhostPositions = {ghostState.getPosition(): ghostState.scaredTimer for ghostState in ghostStates if ghostState.scaredTimer > 0}
+    numOfEatableGhost = len(eatableGhostPositions)
+    capsuleList = currentGameState.getCapsules()
+    numOfCapsule = len(capsuleList)
+    currentPosition = currentGameState.getPacmanPosition()
+
+    def pacmanSearch(position, foodPositions, ghostPositions, eatableGhostPositions, capsulePositions, mazeWalls):
+        food = None
+        ghost = None
+        eatableGhost = None
+        capsule = None
+        actions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+        def shouldContinue():
+            return (food is None) or (ghost is None) or (eatableGhost is None) or (capsule is None)
+
+        def positionAdd(p1, p2):
+            return (int(p1[0] + p2[0]), int(p1[1] + p2[1]))
+
+        exploredPositions = set()
+        queue = util.Queue()
+        queue.push((position, 0, False))
+
+        while not queue.isEmpty():
+            if not shouldContinue():
+                break
+
+            curNode = queue.pop()
+            curPos = curNode[0]
+            if not curPos in exploredPositions:
+                exploredPositions.add(curPos)
+
+                if food is None and curPos in foodPositions and not curNode[2]:
+                    food = curNode[1]
+
+                if ghost is None and curPos in ghostPositions:
+                    ghost = curNode[1]
+
+                if eatableGhost is None and curPos in eatableGhostPositions and not curNode[2] and eatableGhostPositions[curPos] > curNode[1]:
+                    eatableGhost = curNode[1]
+
+                if capsule is None and curPos in capsulePositions and not curNode[2]:
+                    capsule = curNode[1]
+
+                for newPos in [positionAdd(action, curPos) for action in actions]:
+                    if not mazeWalls[newPos[0]][newPos[1]]:
+                        if newPos in ghostPositions:
+                            queue.push((newPos, curNode[1] + 1, True))
+                        else:
+                            queue.push((newPos, curNode[1] + 1, curNode[2]))
+
+        return [food, ghost, eatableGhost, capsule]
+
+    searchResult = pacmanSearch(currentPosition, foodList, ghostPositions, eatableGhostPositions, capsuleList, mazeWalls)
+
+    score -= numOfFoodLeft * 101
+    score -= numOfCapsule * 201
+    score -= numOfGhosts * 203
+
+    foodDist = searchResult[0]
+    ghostDist = searchResult[1]
+    eatableGhostDict = searchResult[2]
+    capsuleDist = searchResult[3]
+
+    if not foodDist is None:
+        score -= 2 * foodDist
+
+    if not capsuleDist is None:
+        score -= capsuleDist * 3
+
+    if not ghostDist is None and ghostDist <= 4:
+        score -= (5 - ghostDist) * 502
+
+    if not eatableGhostDict is None:
+        score -= eatableGhostDict * 4
+
+    if currentGameState.isWin():
+        score += 1000001
+
+    return score
 
 # Abbreviation
 better = betterEvaluationFunction
