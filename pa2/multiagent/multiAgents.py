@@ -404,7 +404,26 @@ def betterEvaluationFunction(currentGameState):
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
       evaluation function (question 5).
 
-      DESCRIPTION: <write something here so we know what you did>
+      DESCRIPTION: 
+      First, pacman will get all information about food, ghost, and capsule in
+      the current state, then pacman will do a BFS to find distance to nearest
+      food, nearest ghost, nearest ghost that can be eat by pacman, and nearest
+      capsule.
+      The score of a state is based on the following factors:
+      1) number of food left, the less the food, the higher the score
+      2) number of capsule, the less the capsule, the higher the score
+      3) number of ghost, the less the ghost, the higher the score
+      4) distance to nearest food, the shorter the distance, the higher the
+         score
+      5) distance to nearest capsule, the shorter the distance, the higher the
+         score
+      6) distance to nearest ghost is the ghost is less than five steps to reach
+         pacman, the longer the distance, the higher the score
+      7) distance to nearest eatable ghost, the shorter the distance, the higher
+         the score
+      8) whether the state is winning state, the winning state will achieve a
+         very score other than non-winning state
+
     """
     "*** YOUR CODE HERE ***"
     score = 0.0
