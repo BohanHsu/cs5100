@@ -1,0 +1,61 @@
+AI Project Proposal
+Sokoban Game AI
+
+Team Members:
+Bohan Xu: xu.bo@husky.neu.edu
+Tiantong Deng: deng.t@husky.neu.edu
+
+Problem:
+In Sokoban problem, it is easy to find out those position that if a box was moved into, the box could never come out. But there are some position that if the robot push a box into, the box could still be moved but it will never reach the goal position, which is harder to detect. 
+As shown in the following graph, there is a box at north line of the map, and there is a goal position at the south line, in that situation, robot could only move the box to east and west, but neither moving east nor west could lead the box to reach its goal. We could announce this situation as game over and stop searching.
+
+#######################
+#          b          #
+#  g                  #
+#######################
+
+Here are some rules that help check situation that game is actually over:
+If a box is at a position, we can’t move it and this position is not a goal position
+
+#############
+#       bb  #
+#           #
+#############
+
+#############
+#          b#
+#           #
+#############
+
+We call those kind of wall that if a box is adjacent to it, the box will always stay next to this wall a trap wall, those positions next to the line is a trap position. If the number of box in on trap is more than the goal position in this trap, the game is over.
+
+This is a trap
+############################                   
+#             b            #
+#                          #
+#                          #
+#                          #
+############################
+
+This is not a trap because the box can be move to goal position
+#########
+#       #
+#       ####################
+#           b              #
+#                  g       #
+############################
+
+If the total number of boxes in on all traps are more than the goal positions on all traps, the game is over.
+
+################
+#g   b         #
+#             b#
+#b             #
+#g        b   g# 
+################
+
+
+Solution: backtracking
+After each move of the robot, if any box is moved, check if the moved box satisfied the constraint if it is in a goal position or it is not in a trap. 
+
+Goal: We want to compare the performance of several different algorithms applied on this problem: such as A* search, BFS, DFS and UCS.
