@@ -264,6 +264,12 @@ class ParticleFilter(InferenceModule):
         weight with each position) is incorrect and may produce errors.
         """
         "*** YOUR CODE HERE ***"
+        self.particles = [None for n in range(self.numParticles)]
+        idx = 0
+        while idx < self.numParticles:
+            self.particles[idx] = self.legalPositions[idx % len(self.legalPositions)]
+            idx += 1
+
 
     def observe(self, observation, gameState):
         """
@@ -296,7 +302,22 @@ class ParticleFilter(InferenceModule):
         emissionModel = busters.getObservationDistribution(noisyDistance)
         pacmanPosition = gameState.getPacmanPosition()
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        newBeliefs = util.Counter()
+        if noisyDistance is None:
+            newBeliefs[self.getJailPosition()] = 1.0
+        else:
+            for particle in self.particles:
+                trueDistance = util.manhattanDistance(particle, pacmanPosition)
+                newBeliefs[particle] += emissionModel[trueDistance]
+
+        if newBeliefs.totalCount() == 0:
+            self.initializeUniformly(gameState)
+        else:
+            self.beliefs = newBeliefs
+            self.beliefs.normalize()
+            for i in range(len(self.particles)):
+                self.particles[i] = util.sample(self.beliefs)
+
 
     def elapseTime(self, gameState):
         """
@@ -313,7 +334,9 @@ class ParticleFilter(InferenceModule):
         a belief distribution.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        for idx in range(len(self.particles)):
+            newPosDist = self.getPositionDistribution(self.setGhostPosition(gameState, self.particles[i]))
+            util.sample(newPosDist)
 
     def getBeliefDistribution(self):
         """
@@ -323,7 +346,12 @@ class ParticleFilter(InferenceModule):
         Counter object)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        beliefs = util.Counter()
+        for particle in self.particles:
+            beliefs[particle] += 1
+
+        beliefs.normalize()
+        return beliefs
 
 class MarginalInference(InferenceModule):
     """
