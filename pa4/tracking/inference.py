@@ -335,8 +335,10 @@ class ParticleFilter(InferenceModule):
         """
         "*** YOUR CODE HERE ***"
         for idx in range(len(self.particles)):
-            newPosDist = self.getPositionDistribution(self.setGhostPosition(gameState, self.particles[i]))
-            util.sample(newPosDist)
+            newPosDist = self.getPositionDistribution(self.setGhostPosition(\
+            gameState, self.particles[idx]))
+            self.particles[idx] = util.sample(newPosDist)
+
 
     def getBeliefDistribution(self):
         """
